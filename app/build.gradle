@@ -25,9 +25,13 @@ android {
         }
     }
 
+    // ─── Multi-Version JDK Support with Automatic Selection ─────────────
+    // Detects available JDK versions (17, 21, 25) and uses the highest.
+    // Falls back to JDK 17 if higher versions are not available.
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_17
-        targetCompatibility JavaVersion.VERSION_17
+        def detectedJdk = detectAvailableJdk()
+        sourceCompatibility detectedJdk
+        targetCompatibility detectedJdk
     }
 
     // Prevent compression of libGDX native libs
@@ -50,6 +54,33 @@ android {
     lint {
         checkReleaseBuilds false
         abortOnError false
+    }
+}
+
+// ─── JDK Version Detection ────────────────────────────────────────────────
+def detectAvailableJdk() {
+    // Priority order: JDK 25 > JDK 21 > JDK 17
+    def jdkVersions = ['25', '21', '17']
+    
+    for (version in jdkVersions) {
+        def javaHome = System.getenv("JAVA_HOME_${version}")
+        if (javaHome) {
+            logger.lifecycle("✓ Detected JDK ${version} at ${javaHome}")
+            return getJavaVersion(version)
+        }
+    }
+    
+    // Fallback to system Java if detection fails
+    def systemJavaVersion = System.getProperty("java.version")
+    logger.lifecycle("⚠ Using system JDK: ${systemJavaVersion}")
+    return JavaVersion.VERSION_17
+}
+
+def getJavaVersion(String version) {
+    switch(version) {
+        case '25': return JavaVersion.VERSION_25
+        case '21': return JavaVersion.VERSION_21
+        default: return JavaVersion.VERSION_17
     }
 }
 
@@ -76,6 +107,9 @@ dependencies {
 
     // ─── Settings UI / Activity Result APIs ───────────────────────────
     implementation 'androidx.activity:activity:1.9.3'
+
+    // ─── Device Info & System Properties ──────────────────────────────
+    implementation 'androidx.core:core:1.12.0'
 
     // ─── Unit tests (GroupStore runs on host JVM; org.json is stubbed
     //     in android.jar, so pull the real artifact for tests) ─────────
