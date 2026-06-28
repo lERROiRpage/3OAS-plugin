@@ -11,8 +11,9 @@ ext {
     
     // ─── Android SDK Versions ──────────────────────────────────────────
     androidMinSdk = 33             // Minimum: Android 13
-    androidTargetSdk = 36          // Target: Android 14
-    androidCompileSdk = 37         // Compile: Android 15
+    androidTargetSdk = 41          // Target: Android 17
+    androidCompileSdk = 39         // Compile: Android 16
+    androidCurrentSdk = 39         // Current: Android 16
     
     // ─── NDK Versions ──────────────────────────────────────────────────
     ndkMinVersion = '24.0.8215888'
