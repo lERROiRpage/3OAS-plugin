@@ -9,6 +9,18 @@ plugins {
 ext {
     gdxVersion = '1.13.0'
     
+    // ─── Gradle Versions ───────────────────────────────────────────────
+    gradleMinVersion = '8.9'       // Minimum: Gradle 8.9 (JDK 17 support)
+    gradleVersion = '9.5.1'        // Current: Gradle 9.5.1
+    gradleTargetVersion = '9.6'    // Target: Gradle 9.6 (when available)
+    
+    // ─── JDK Versions with Multi-Version Support ───────────────────────
+    jdkVersions = [
+        '17': 'JavaVersion.VERSION_17',  // Base: JDK 17
+        '21': 'JavaVersion.VERSION_21',  // JDK 21 (LTS)
+        '25': 'JavaVersion.VERSION_25'   // JDK 25 (Latest)
+    ]
+    
     // ─── Android SDK Versions ──────────────────────────────────────────
     androidMinSdk = 33             // Minimum: Android 13
     androidTargetSdk = 41          // Target: Android 17
