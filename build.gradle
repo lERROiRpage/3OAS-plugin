@@ -16,6 +16,6 @@ ext {
     
     // ─── NDK Versions ──────────────────────────────────────────────────
     ndkMinVersion = '24.0.8215888'
-    ndkTargetVersion = '27.0.12077973'
-    ndkVersion = '27.0.12077973'   // Current/default
+    ndkTargetVersion = '29.0.11111111'
+    ndkVersion = '29.0.11111111'   // Current/default
 }
