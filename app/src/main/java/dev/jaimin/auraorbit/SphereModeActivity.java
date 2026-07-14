@@ -56,6 +56,10 @@ public class SphereModeActivity extends AndroidApplication {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        android.content.SharedPreferences prefs = androidx.preference.PreferenceManager.getDefaultSharedPreferences(this);
+        // No window-level FLAG_BLUR_BEHIND here.
+        // We will apply blur to a specific View so it can dynamically resize.
+
         // ─── Fullscreen / edge-to-edge ──────────────────────────────────
         // Tell the decor not to fit system windows so the GL surface reaches
         // every pixel including display cutouts.
@@ -87,25 +91,100 @@ public class SphereModeActivity extends AndroidApplication {
         // command gating).
         sphereEngine = new SphereEngine(this, true, groupName);
         View glView = initializeForView(sphereEngine, config);
+        glView.setClickable(true); // Ensure glView consumes clicks
         if (graphics.getView() instanceof android.view.SurfaceView) {
             android.view.SurfaceView surfaceView = (android.view.SurfaceView) graphics.getView();
             surfaceView.getHolder().setFormat(android.graphics.PixelFormat.TRANSLUCENT);
-            surfaceView.setZOrderMediaOverlay(true);
+            surfaceView.setZOrderOnTop(true);
         }
-        setContentView(glView);
+        String scalePref = groupName != null ? "pref_sphere_scale_" + groupName : "pref_sphere_scale";
+        String radiusPref = groupName != null ? "pref_blur_radius_" + groupName : "pref_blur_radius";
+        String strengthPref = groupName != null ? "pref_blur_strength_" + groupName : "pref_blur_strength";
+        String posPref = groupName != null ? "pref_sphere_position_" + groupName : "pref_sphere_position";
+        String xPref = groupName != null ? "pref_sphere_x_" + groupName : "pref_sphere_x";
+        String yPref = groupName != null ? "pref_sphere_y_" + groupName : "pref_sphere_y";
 
-        // ─── Window Bounds ────────────────────────────────────────────────
-        // Make the window a perfect square in the center of the screen.
-        // This leaves the top and bottom of the screen completely outside our window
-        // bounds, so notification swipes and gesture navigation pass directly to the OS!
+        float scale = prefs.getFloat(scalePref, 1.0f);
+        String pos = prefs.getString(posPref, "center");
+        int blurRadiusPref = prefs.getInt(radiusPref, 50);
+        int blurStrengthPref = prefs.getInt(strengthPref, 50);
+        // Migrate old pref_blur_amount if the new ones don't exist
+        if (!prefs.contains(radiusPref) && groupName == null && prefs.contains("pref_blur_amount")) {
+            int oldAmount = prefs.getInt("pref_blur_amount", 0);
+            blurRadiusPref = oldAmount;
+            blurStrengthPref = oldAmount > 0 ? 50 : 0;
+        }
+
         android.util.DisplayMetrics metrics = getResources().getDisplayMetrics();
         int screenWidth = metrics.widthPixels;
+        int screenHeight = metrics.heightPixels;
+        int sphereSize = (int) (screenWidth * scale);
+
+        android.widget.FrameLayout container = new android.widget.FrameLayout(this);
+        
+        // ─── Window Bounds ────────────────────────────────────────────────
+        int sphereX = (screenWidth - sphereSize) / 2;
+        int sphereY = (screenHeight - sphereSize) / 2;
+        if ("top".equals(pos)) {
+            sphereY = 100;
+        } else if ("bottom".equals(pos)) {
+            sphereY = screenHeight - sphereSize - 100;
+        } else if ("custom".equals(pos)) {
+            sphereX = (int) prefs.getFloat(xPref, sphereX);
+            sphereY = (int) prefs.getFloat(yPref, sphereY);
+        }
+        
+        int sphereCenterX = sphereX + sphereSize / 2;
+        int sphereCenterY = sphereY + sphereSize / 2;
+        
+        // Position glView absolutely
+        android.widget.FrameLayout.LayoutParams glParams = new android.widget.FrameLayout.LayoutParams(
+                sphereSize, sphereSize, android.view.Gravity.TOP | android.view.Gravity.START);
+        glParams.leftMargin = sphereX;
+        glParams.topMargin = sphereY;
+        container.addView(glView, glParams);
+        
+        // Close the activity if the user touches the blurred background outside the sphere
+        container.setOnClickListener(v -> finish());
+        
+        setContentView(container);
+
+        int maxDim = Math.max(screenWidth, screenHeight) * 2;
+        int windowSize = (int) (sphereSize + (maxDim - sphereSize) * (blurRadiusPref / 100.0f));
+        if (blurRadiusPref == 0) windowSize = sphereSize;
+        
         WindowManager.LayoutParams params = getWindow().getAttributes();
-        params.width = screenWidth;
-        params.height = screenWidth;
-        params.gravity = android.view.Gravity.CENTER;
+        params.width = WindowManager.LayoutParams.MATCH_PARENT;
+        params.height = WindowManager.LayoutParams.MATCH_PARENT;
+        params.gravity = android.view.Gravity.TOP | android.view.Gravity.START;
+        params.x = 0;
+        params.y = 0;
+        
         params.flags |= WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL;
         params.flags |= WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH;
+        params.flags |= WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS;
+        
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.S && blurRadiusPref > 0 && blurStrengthPref > 0) {
+            int radius = Math.min(blurStrengthPref * 2, 150);
+            if (radius == 0) radius = 1;
+            getWindow().setBackgroundBlurRadius(radius);
+        } else if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.S) {
+            getWindow().setBackgroundBlurRadius(0);
+        }
+        
+        int left = sphereCenterX - windowSize / 2;
+        int top = sphereCenterY - windowSize / 2;
+        int right = screenWidth - (left + windowSize);
+        int bottom = screenHeight - (top + windowSize);
+        
+        android.graphics.drawable.GradientDrawable circle = new android.graphics.drawable.GradientDrawable();
+        circle.setShape(android.graphics.drawable.GradientDrawable.OVAL);
+        circle.setColor(android.graphics.Color.TRANSPARENT);
+        
+        android.graphics.drawable.InsetDrawable insetDrawable = 
+            new android.graphics.drawable.InsetDrawable(circle, left, top, right, bottom);
+        getWindow().setBackgroundDrawable(insetDrawable);
+        
         getWindow().setAttributes(params);
 
         // ─── Hide system bars (immersive fullscreen) ─────────────────────
@@ -114,7 +193,6 @@ public class SphereModeActivity extends AndroidApplication {
         hideSystemBars();
 
         // ─── Empty state popup ────────────────────────────────────────────
-        android.content.SharedPreferences prefs = androidx.preference.PreferenceManager.getDefaultSharedPreferences(this);
         java.util.Set<String> selectedApps = prefs.getStringSet(AppFetcher.PREF_SELECTED_APPS, new java.util.HashSet<>());
         if (selectedApps.isEmpty()) {
             new com.google.android.material.dialog.MaterialAlertDialogBuilder(this)

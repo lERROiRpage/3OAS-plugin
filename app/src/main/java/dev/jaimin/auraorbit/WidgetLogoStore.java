@@ -4,36 +4,32 @@ import android.content.Context;
 import android.net.Uri;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.content.SharedPreferences;
-import androidx.preference.PreferenceManager;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.InputStream;
 
-public class BackgroundStore {
-    public static final String PREF_BACKGROUND_VERSION = "bg_ver";
-    private static final String DEFAULT_FILE_NAME = "background.png";
+public class WidgetLogoStore {
+    private static final String DEFAULT_FILE_NAME = "widget_logo.png";
 
-    public static boolean exists(Context c, String groupName) {
-        return file(c, groupName).exists();
+    public static boolean exists(Context context, String groupName) {
+        return file(context, groupName).exists();
     }
     
-    public static boolean exists(Context c) {
-        return exists(c, null);
+    public static boolean exists(Context context) {
+        return exists(context, null);
     }
-    
-    public static void clear(Context c, String groupName) {
-        File f = file(c, groupName);
+
+    public static void clear(Context context, String groupName) {
+        File f = file(context, groupName);
         if (f.exists()) {
             f.delete();
         }
-        bumpVersion(c);
-    }
-
-    public static void clear(Context c) {
-        clear(c, null);
     }
     
+    public static void clear(Context context) {
+        clear(context, null);
+    }
+
     public static boolean saveFromUri(Context context, Uri uri, String groupName) {
         try {
             InputStream in = context.getContentResolver().openInputStream(uri);
@@ -44,8 +40,11 @@ public class BackgroundStore {
             BitmapFactory.decodeStream(in, null, options);
             in.close();
             
-            int maxSize = 2048;
-            int scale = computeSampleSize(options.outWidth, options.outHeight, maxSize);
+            int maxSize = 512;
+            int scale = 1;
+            while ((options.outWidth / scale) > maxSize || (options.outHeight / scale) > maxSize) {
+                scale *= 2;
+            }
 
             BitmapFactory.Options options2 = new BitmapFactory.Options();
             options2.inSampleSize = scale;
@@ -74,7 +73,6 @@ public class BackgroundStore {
             out.close();
             bitmap.recycle();
             
-            bumpVersion(context);
             return true;
         } catch (Exception e) {
             e.printStackTrace();
@@ -85,28 +83,14 @@ public class BackgroundStore {
     public static boolean saveFromUri(Context context, Uri uri) {
         return saveFromUri(context, uri, null);
     }
-    
-    public static int computeSampleSize(int width, int height, int maxSize) {
-        int scale = 1;
-        while ((width / scale) > maxSize || (height / scale) > maxSize) {
-            scale *= 2;
-        }
-        return scale;
-    }
-    
-    private static void bumpVersion(Context context) {
-        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
-        int v = prefs.getInt(PREF_BACKGROUND_VERSION, 0);
-        prefs.edit().putInt(PREF_BACKGROUND_VERSION, v + 1).apply();
-    }
-    
+
     public static File file(Context context, String groupName) {
         String fileName = (groupName == null || groupName.isEmpty()) 
                 ? DEFAULT_FILE_NAME 
-                : "background_" + groupName.replaceAll("[^a-zA-Z0-9_-]", "") + ".png";
+                : "widget_logo_" + groupName.replaceAll("[^a-zA-Z0-9_-]", "") + ".png";
         return new File(context.getFilesDir(), fileName);
     }
-
+    
     public static File file(Context context) {
         return file(context, null);
     }

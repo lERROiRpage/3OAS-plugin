@@ -19,7 +19,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
-    
+    <uses-permission android:name="android.permission.SET_WALLPAPER" />
 
     <!-- ─── Feature Declarations ─────────────────────────────────────────── -->
     <!--
@@ -93,9 +93,15 @@
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_CONFIGURE" />
+            </intent-filter>
         </activity>
 
-        
+        <activity
+            android:name=".SpherePositionEditorActivity"
+            android:exported="false"
+            android:theme="@style/Theme.Material3.Light.NoActionBar" />
 
         <!-- ═══════════════════════════════════════════════════════════════
              4. WIDGET PROVIDER (Transparent Popup Architecture)
@@ -113,6 +119,13 @@
 
         <receiver
             android:name=".WidgetPinnedReceiver"
+            android:exported="false" />
+
+
+        <activity
+            android:name=".SphereBlurEditorActivity"
+            android:theme="@style/Theme.AuraOrbit.TransparentFullscreen"
+            android:screenOrientation="portrait"
             android:exported="false" />
 
         <activity

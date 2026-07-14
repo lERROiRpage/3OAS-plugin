@@ -5,13 +5,50 @@
 
 [This is video for how to show on mobile](Video/Full%20details.mp4)
 
+![Homescreen Sphere](docs/images/homescreen-sphere.png)
+
 ## 🚀 Core Features
 
-- **3D Interactive Sphere**: Rotate your apps with natural quaternion-based momentum at 120 FPS.
-- **Intelligent Grouping**: Group related apps together with 3D translucent, color-coded backdrops.
-- **Dynamic Widgets**: Pin customized, group-specific dynamic widgets straight to your home screen.
-- **Standalone Sphere Mode**: Launch AuraOrbit as a standalone, fullscreen immersive app.
-- **Instant Performance**: Advanced memory caching guarantees your sphere loads instantly without delay.
+**3D Sphere**
+- Rotate apps with natural quaternion-based momentum at up to 120 FPS (30/60/90/120 selectable)
+- Drag-and-drop sphere positioning — center, top, bottom, or anywhere via a custom editor (which also scales the sphere radius!)
+- Adjustable icon size and rotation speed
+
+**Background & Blur**
+- Upload a custom background image or use the default gradient
+- Dual blur system: independent Blur Radius (area) and Blur Strength (intensity) controls
+- Five blur presets from "No Blur" to "Full Screen Blur" with real-time preview
+
+**Icon Pack Support**
+- Apply third-party icon packs (Nova, Apex, etc.) to all apps orbiting your sphere
+- Automatically applies to your group widgets, app picker, and the central AuraOrbit logo
+
+**App Groups**
+- Create color-coded groups with 8 presets + custom RGB color picker
+- Assign apps to groups; groups appear as 3D translucent backdrops on the sphere
+- **Individual Group Overrides**: Configure Sphere Position, Background Image, and Blur explicitly for each group!
+- Search and bulk-select apps in the picker with an intuitive Edit Apps popup dialog
+
+**Home Screen Widgets**
+- Per-group widgets with live color-coded previews
+- Custom logo upload per widget (or use the default planet icon)
+- Toggle: transparent background, hide logo, hide text, system Material You color
+- Custom orbit/ring color per group
+- Pin multiple widgets for different groups simultaneously
+
+**Standalone Sphere Mode**
+- Launch AuraOrbit as a fullscreen immersive app from any group widget
+- Floats perfectly over your home screen seamlessly with zero black dimming!
+- Swipe-from-edge to reveal system bars; screen stays on
+- Tap apps to launch; tap outside to return home
+
+**Launcher Integration**
+- Optional accessibility service detects which home screen page you're on
+- Sphere auto-shows/hides when switching pages or opening the app drawer
+
+**Performance & Privacy**
+- Advanced memory caching for instant sphere loads
+- Zero unnecessary permissions — FOSS, no tracking
 
 📖 **Want to see everything AuraOrbit can do? Check out the [Comprehensive Features Guide](features.md).**
 
@@ -53,10 +90,20 @@ Once installed, navigate to:
 
 Hit the **Settings ⚙️** icon in the preview window to open the AuraOrbit dashboard where you can:
 - Select which apps appear on your orbit.
-- Create color-coded app groups.
-- Set the target framerate (60/90/120).
-- Toggle your underlying system background.
-- Adjust sphere radius and icon scaling!
+- Apply third-party icon packs directly to your 3D sphere.
+- Create color-coded app groups with custom names and colors.
+- Drag and scale the sphere to any position on your screen.
+- Upload a custom background image and tune blur radius + strength.
+- Override backgrounds, blur, and positioning for individual app groups!
+- Customize each group's widget: logo, ring color, transparency, text visibility.
+- Set the target framerate (30/60/90/120 FPS).
+- Adjust icon size and rotation speed.
+
+## 🤝 Contributing
+
+We welcome contributions from everyone! If you want to contribute to AuraOrbit, feel free to fork the repository, make your changes, and submit a pull request. 
+
+If you find any bugs or have feature requests, please **raise an issue** on GitHub so we can look into it. 
 
 ## 📄 License
 
